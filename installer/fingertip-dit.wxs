@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Fingertip-dit: community fork of Impervious's Fingertip (Apache-2.0) that bundles a
+  current hnsd. Same per-user layout and UpgradeCode as the official Fingertip 0.0.3 MSI,
+  so installing this upgrades 0.0.3 in place.
+  Built by build.sh (wixl from MSYS2 msitools); expects the payload in build/stage.
+-->
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="*" Name="Fingertip-dit" Language="1033" Version="0.0.4"
+           Manufacturer="Fingertip-dit community fork" UpgradeCode="{EDB4EEA2-D48D-4681-86EF-2B0310E54F01}">
+    <Package InstallerVersion="500" Compressed="yes" InstallScope="perUser"
+             Description="Fingertip-dit 0.0.4 - Handshake resolver with updated hnsd"
+             Comments="Unofficial fork of Fingertip by Impervious, not affiliated with Impervious" />
+    <Media Id="1" Cabinet="fingertip.cab" EmbedCab="yes" />
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of Fingertip-dit is already installed." />
+
+    <Icon Id="FingertipIcon" SourceFile="installer/fingertip.ico" />
+    <Property Id="ARPPRODUCTICON" Value="FingertipIcon" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/galetaire/Fingertip-dit" />
+    <Property Id="ARPHELPLINK" Value="https://github.com/galetaire/Fingertip-dit/issues" />
+    <Property Id="ARPCOMMENTS" Value="Unofficial fork of Fingertip (Impervious) with hnsd from github.com/handshake-org/hnsd" />
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="LocalAppDataFolder">
+        <!-- Folder name kept as "Fingertip" so 0.0.3 installs upgrade in place. -->
+        <Directory Id="INSTALLDIR" Name="Fingertip">
+          <Component Id="ApplicationFiles" Guid="{6A0D2F94-3B71-4E8C-A5D2-91C7E4B0F358}" Win64="yes">
+            <RegistryValue Root="HKCU" Key="Software\Fingertip-dit" Name="files" Type="integer" Value="1" KeyPath="yes" />
+            <File Id="FingertipExe" Name="fingertip.exe" Source="build/stage/fingertip.exe" />
+            <File Id="HnsdWrapper" Name="hnsd.exe" Source="build/stage/hnsd.exe" />
+            <File Id="HnsdCore" Name="hnsd-core.exe" Source="build/stage/hnsd-core.exe" />
+            <File Id="LibUnbound" Name="libunbound-8.dll" Source="build/stage/libunbound-8.dll" />
+            <File Id="LibSsl" Name="libssl-3-x64.dll" Source="build/stage/libssl-3-x64.dll" />
+            <File Id="LibCrypto" Name="libcrypto-3-x64.dll" Source="build/stage/libcrypto-3-x64.dll" />
+            <File Id="Notices" Name="THIRD-PARTY-NOTICES.txt" Source="build/stage/THIRD-PARTY-NOTICES.txt" />
+            <RemoveFolder Id="RemoveInstallDir" On="uninstall" />
+          </Component>
+        </Directory>
+      </Directory>
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ProgramMenuSubfolder" Name="Fingertip-dit">
+          <Component Id="ApplicationShortcuts" Guid="{B47E19C3-0D6A-4F25-8E93-5C2A7D1F6B04}">
+            <Shortcut Id="FingertipShortcut" Name="Fingertip-dit" Description="A decentralized Handshake resolver"
+                      Target="[INSTALLDIR]fingertip.exe" WorkingDirectory="INSTALLDIR" Icon="FingertipIcon" />
+            <RegistryValue Root="HKCU" Key="Software\Fingertip-dit" Name="installed" Type="integer" Value="1" KeyPath="yes" />
+            <RemoveFolder Id="RemoveProgramMenuSubfolder" On="uninstall" />
+          </Component>
+        </Directory>
+      </Directory>
+    </Directory>
+
+    <Feature Id="DefaultFeature" Level="1">
+      <ComponentRef Id="ApplicationFiles" />
+      <ComponentRef Id="ApplicationShortcuts" />
+    </Feature>
+  </Product>
+</Wix>

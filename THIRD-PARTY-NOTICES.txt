@@ -1,0 +1,21 @@
+Fingertip-dit - third-party notices
+===================================
+
+Fingertip-dit is an unofficial community fork of Fingertip by Impervious Inc.
+It is not affiliated with or endorsed by Impervious Inc.
+
+Component            Source                                                     License
+fingertip.exe        Fingertip v0.0.3, Impervious Inc. (unmodified binary)      Apache-2.0
+                     https://github.com/imperviousinc/fingertip
+hnsd-core.exe        hnsd, handshake-org (commit 0cb70e5)                       MIT
+                     https://github.com/handshake-org/hnsd
+hnsd.exe             Fingertip-dit launcher (wrapper/hnsd-wrapper.c)            Apache-2.0
+libunbound-8.dll     Unbound, NLnet Labs (MSYS2 mingw-w64 build)                BSD-3-Clause
+                     https://nlnetlabs.nl/projects/unbound/
+libssl-3-x64.dll     OpenSSL 3 (MSYS2 mingw-w64 build)                          Apache-2.0
+libcrypto-3-x64.dll  https://www.openssl.org/
+
+Changes from Fingertip 0.0.3: the bundled hnsd (2021) was replaced by a current hnsd
+build plus a launcher that enables checkpoint sync and persistent headers, the
+OpenSSL 1.1 DLLs were replaced by OpenSSL 3, and the installer was rebuilt.
+fingertip.exe itself is unmodified.

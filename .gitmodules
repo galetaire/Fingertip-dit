@@ -1,0 +1,6 @@
+[submodule "third_party/hnsd"]
+	path = third_party/hnsd
+	url = https://github.com/handshake-org/hnsd.git
+[submodule "third_party/fingertip"]
+	path = third_party/fingertip
+	url = https://github.com/imperviousinc/fingertip.git
