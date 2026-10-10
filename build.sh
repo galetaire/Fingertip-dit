@@ -22,7 +22,7 @@ rm -rf build && mkdir -p build/stage dist
 
 echo "==> hnsd ($(git -C third_party/hnsd rev-parse --short HEAD))"
 git -C third_party/hnsd archive --format=tar --prefix=hnsd/ HEAD | tar -x -C build
-(cd build/hnsd && ./autogen.sh >/dev/null && ./configure >/dev/null && make -j"$(nproc)" >/dev/null)
+(cd build/hnsd && ./autogen.sh >/dev/null 2>&1 && ./configure >/dev/null && make >/dev/null 2>&1)  # serial: the bundled libuv has a parallel-make race
 cp build/hnsd/hnsd.exe build/stage/hnsd-core.exe
 
 echo "==> hnsd wrapper"
