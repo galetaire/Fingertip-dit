@@ -1,7 +1,8 @@
 # Fingertip-dit
 
 An unofficial community fork of [Fingertip](https://github.com/imperviousinc/fingertip) by
-Impervious, the Windows Handshake (HNS) resolver, with a working, up-to-date `hnsd`.
+Impervious, the Handshake (HNS) resolver, with a working, up-to-date `hnsd`. Builds for
+**Windows** (`.msi`) and **Linux** (`.AppImage`).
 
 > Not affiliated with or endorsed by Impervious Inc. Fingertip is © Impervious Inc.,
 > licensed under Apache-2.0.
@@ -27,8 +28,11 @@ and puts it in a Windows job object so it stops when Fingertip stops it.
 
 ## Install
 
-Download `Fingertip-dit-0.0.4.msi` from [Releases](https://github.com/galetaire/Fingertip-dit/releases)
-and run it. Before you do:
+Downloads are on the [Releases](https://github.com/galetaire/Fingertip-dit/releases) page.
+
+### Windows
+
+Run `Fingertip-dit-0.0.4.msi`. Before you do:
 
 - **Quit Fingertip first** (tray icon → Quit) if it's running.
 - It's a per-user install into `%LOCALAPPDATA%\Fingertip` and needs no admin rights.
@@ -37,10 +41,26 @@ and run it. Before you do:
   Check the download against the `.sha256` file in the release.
 - Silent install: `msiexec /i Fingertip-dit-0.0.4.msi /qn`
 
+### Linux (x86_64)
+
+```sh
+chmod +x Fingertip-dit-0.0.4-x86_64.AppImage
+./Fingertip-dit-0.0.4-x86_64.AppImage
+```
+
+- Needs glibc 2.35 or newer (Ubuntu 22.04+, Debian 12+, Fedora 36+). Some distros need
+  `libfuse2` to run AppImages; without it, run with `--appimage-extract-and-run`.
+- `hnsd` saves its headers in `~/.local/share/Fingertip-dit/hnsd-data`.
+- Fingertip doesn't configure Linux automatically (that's unchanged from 0.0.3). On
+  first launch it opens its setup page, which walks you through setting your browser's
+  proxy and trusting its certificate.
+
 On first start, lookups fail for about 2 minutes while `hnsd` syncs from its checkpoint.
 After that, names resolve.
 
 ## Build from source
+
+### Windows
 
 Requires [MSYS2](https://www.msys2.org). In an **MSYS2 MINGW64** shell:
 
@@ -57,9 +77,26 @@ official Fingertip v0.0.3 MSI and extracts `fingertip.exe` from it (both checked
 SHA-256), copies the Unbound/OpenSSL DLLs from MSYS2, and builds
 `dist/Fingertip-dit-0.0.4.msi` with `wixl`.
 
+### Linux
+
+On Ubuntu 22.04 x86_64 (or in an `ubuntu:22.04` container):
+
+```sh
+sudo apt-get install -y build-essential autoconf automake libtool git curl file libunbound-dev patchelf
+git clone --recursive https://github.com/galetaire/Fingertip-dit.git
+cd Fingertip-dit
+./packaging/linux/build-appimage.sh
+```
+
+This unpacks the official Fingertip v0.0.3 AppImage (checked by SHA-256), swaps the old
+`hnsd` for `hnsd-core` plus the launcher ([`wrapper/hnsd-wrapper-linux.c`](wrapper/hnsd-wrapper-linux.c)),
+bundles hnsd's libraries in `usr/lib/hnsd`, and repacks it as
+`dist/Fingertip-dit-0.0.4-x86_64.AppImage`. The [Build Linux AppImage](.github/workflows/build.yml)
+GitHub Actions workflow runs the same script and smoke-tests the result.
+
 `third_party/fingertip` is pinned to the v0.0.3 source for reference. The binary
-isn't rebuilt from it, so the shipped `fingertip.exe` is byte-identical to the
-official release.
+isn't rebuilt from it, so the shipped `fingertip` binaries are byte-identical to the
+official releases.
 
 ## License
 

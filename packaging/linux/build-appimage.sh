@@ -38,7 +38,7 @@ for lib in $old_libs; do
 done
 rm "$APPDIR/usr/bin/hnsd"
 install -m755 "$B/hnsd/hnsd" "$APPDIR/usr/bin/hnsd-core"
-gcc -O2 -Wall -o "$APPDIR/usr/bin/hnsd" wrapper/hnsd-wrapper-posix.c
+gcc -O2 -Wall -o "$APPDIR/usr/bin/hnsd" wrapper/hnsd-wrapper-linux.c
 
 # hnsd-core's own libraries go in a separate folder so they never clash with
 # the GTK libraries fingertip uses from usr/lib.
