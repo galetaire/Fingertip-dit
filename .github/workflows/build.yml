@@ -1,0 +1,92 @@
+name: Build Linux and macOS packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Attach the packages to this existing release tag (leave empty to only build)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    container: ubuntu:22.04
+    steps:
+      - name: Install build dependencies
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            build-essential autoconf automake libtool git curl file ca-certificates \
+            libunbound-dev patchelf
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Build AppImage
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          bash packaging/linux/build-appimage.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux
+          path: dist/*
+
+  linux-test:
+    needs: linux
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: linux
+          path: dist
+      - name: Smoke test hnsd from the AppImage
+        run: |
+          sudo apt-get install -y dnsutils
+          cd dist && chmod +x Fingertip-dit-*.AppImage && ./Fingertip-dit-*.AppImage --appimage-extract >/dev/null
+          ldd squashfs-root/usr/bin/hnsd-core | grep -E 'not found|unbound|ssl' || true
+          bash ../packaging/smoke-test.sh "$PWD/squashfs-root/usr/bin/hnsd"
+
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install build dependencies
+        run: |
+          brew install autoconf automake libtool
+          # fingertip and hnsd-core are x86_64; Apple Silicon runners need Rosetta 2
+          if [ "$(uname -m)" = arm64 ]; then
+            /usr/bin/pgrep -q oahd || softwareupdate --install-rosetta --agree-to-license
+          fi
+      - name: Build DMG
+        run: bash packaging/macos/build-dmg.sh
+      - name: Smoke test hnsd from the DMG
+        run: |
+          MNT=$(mktemp -d)
+          hdiutil attach -nobrowse -readonly -mountpoint "$MNT" dist/Fingertip-dit-*.dmg
+          codesign --verify --strict --deep --verbose=2 "$MNT/Fingertip-dit.app"
+          bash packaging/smoke-test.sh "$MNT/Fingertip-dit.app/Contents/MacOS/hnsd"
+          hdiutil detach "$MNT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos
+          path: dist/*
+
+  release:
+    if: inputs.release_tag != ''
+    needs: [linux-test, macos]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Attach to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ inputs.release_tag }}" dist/* --clobber -R "${{ github.repository }}"
