@@ -9,7 +9,7 @@ APPIMAGE=$(realpath "$1")
 WORK=$(mktemp -d)
 LOG="$WORK/app.log"
 export HOME="$WORK/home" XDG_DATA_HOME="$WORK/home/.local/share" XDG_CONFIG_HOME="$WORK/home/.config"
-mkdir -p "$HOME"
+mkdir -p "$XDG_CONFIG_HOME" "$XDG_DATA_HOME"  # a real desktop always has these
 
 cd "$WORK" && chmod +x "$APPIMAGE" && "$APPIMAGE" --appimage-extract >/dev/null
 echo "--- libraries fingertip can't find:"
