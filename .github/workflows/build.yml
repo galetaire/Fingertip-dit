@@ -7,6 +7,10 @@ on:
         description: "Attach the packages to this existing release tag (leave empty to only build)"
         required: false
         default: ""
+      baseline_url:
+        description: "Optional: also launch this AppImage URL in the GUI test, for comparison (never fails the run)"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -50,9 +54,42 @@ jobs:
           ldd squashfs-root/usr/bin/hnsd-core | grep -E 'not found|unbound|ssl' || true
           bash ../packaging/smoke-test.sh "$PWD/squashfs-root/usr/bin/hnsd"
 
+  gui-test:
+    needs: linux
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        distro: ["ubuntu:24.04", "debian:12", "fedora:latest", "archlinux:latest"]
+    container: ${{ matrix.distro }}
+    steps:
+      - name: Install a desktop-like runtime (X server, D-Bus, GTK 3)
+        run: |
+          case "${{ matrix.distro }}" in
+            ubuntu*|debian*)
+              apt-get update
+              DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends                 xvfb dbus ca-certificates curl libgtk-3-0t64 2>/dev/null ||
+              DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends                 xvfb dbus ca-certificates curl libgtk-3-0 ;;
+            fedora*) dnf install -y xorg-x11-server-Xvfb dbus-daemon gtk3 curl findutils ;;
+            archlinux*) pacman -Syu --noconfirm xorg-server-xvfb dbus gtk3 curl ;;
+          esac
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: linux
+          path: dist
+      - name: Launch the app
+        run: bash packaging/gui-test.sh dist/Fingertip-dit-*.AppImage
+      - name: Baseline for comparison
+        if: inputs.baseline_url != ''
+        continue-on-error: true
+        run: |
+          curl -fsSL -o /tmp/baseline.AppImage "${{ inputs.baseline_url }}"
+          bash packaging/gui-test.sh /tmp/baseline.AppImage
+
   release:
     if: inputs.release_tag != ''
-    needs: linux-test
+    needs: [linux-test, gui-test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4

@@ -8,7 +8,7 @@ set -euo pipefail
 cd "$(dirname "$0")/../.."
 
 VERSION=0.0.4
-# Official Fingertip 0.0.3 AppImage; fingertip and its GTK libs are reused unchanged.
+# Official Fingertip 0.0.3 AppImage; the fingertip binary is reused unchanged.
 FINGERTIP_URL=https://github.com/imperviousinc/fingertip/releases/download/v0.0.3/Fingertip-v0.0.3.AppImage
 FINGERTIP_SHA256=4b03e998d7065dc56b756511f34e19fbf934f2d5c7b77f533b4ed26c1ca3c94f
 APPIMAGETOOL_URL=https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
@@ -29,19 +29,31 @@ git -C third_party/hnsd archive --format=tar --prefix=hnsd/ HEAD | tar -x -C "$B
 # serial make: the bundled libuv has a parallel-make race
 (cd "$B/hnsd" && ./autogen.sh >/dev/null 2>&1 && ./configure >/dev/null && make >/dev/null 2>&1)
 
-echo "==> replace hnsd"
-# Libraries only the old hnsd needed (fingertip itself doesn't link them).
-old_libs=$(LD_LIBRARY_PATH="$APPDIR/usr/lib" ldd "$APPDIR/usr/bin/hnsd" | awk -v d="$APPDIR/usr/lib/" 'index($3, d) == 1 {print $3}')
-ft_libs=$(LD_LIBRARY_PATH="$APPDIR/usr/lib" ldd "$APPDIR/usr/bin/fingertip" | awk -v d="$APPDIR/usr/lib/" 'index($3, d) == 1 {print $3}')
-for lib in $old_libs; do
-  grep -qxF "$lib" <<<"$ft_libs" || rm -v "$lib"
+echo "==> use the system GTK"
+# The official AppImage bundles Ubuntu 18.04 copies of GTK 3 and part of GLib
+# (libgmodule, but not libglib/libgio). On current distros those clash with the
+# system GLib ("undefined symbol: g_module_open_full") and GNOME settings, so
+# fingertip must use the host's GTK stack. Only the AppIndicator tray libraries
+# are kept: many distros no longer ship libappindicator3, and they work against
+# any GTK 3. Everything else in usr/lib was the 18.04 desktop stack or the old
+# hnsd's libraries.
+KEEP_LIBS="libappindicator3.so.1 libindicator3.so.7 libdbusmenu-glib.so.4 libdbusmenu-gtk3.so.4"
+for lib in "$APPDIR"/usr/lib/*; do
+  [ -f "$lib" ] || continue
+  case " $KEEP_LIBS " in
+    *" $(basename "$lib") "*) ;;
+    *) rm "$lib" ;;
+  esac
 done
+echo "kept: $(cd "$APPDIR/usr/lib" && ls)"
+
+echo "==> replace hnsd"
 rm "$APPDIR/usr/bin/hnsd"
 install -m755 "$B/hnsd/hnsd" "$APPDIR/usr/bin/hnsd-core"
 gcc -O2 -Wall -o "$APPDIR/usr/bin/hnsd" wrapper/hnsd-wrapper-linux.c
 
 # hnsd-core's own libraries go in a separate folder so they never clash with
-# the GTK libraries fingertip uses from usr/lib.
+# the tray libraries fingertip uses from usr/lib.
 mkdir -p "$APPDIR/usr/lib/hnsd"
 ldd "$APPDIR/usr/bin/hnsd-core" | awk '$3 ~ /^\// {print $3}' | while read -r lib; do
   case "$(basename "$lib")" in
