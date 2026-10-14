@@ -61,6 +61,42 @@ chmod +x Fingertip-dit-0.0.4-x86_64.AppImage
 On first start, lookups fail for about 2 minutes while `hnsd` syncs from its checkpoint.
 After that, names resolve.
 
+### Uninstall on Linux
+
+An AppImage isn't installed system-wide, so uninstalling means quitting it, undoing the
+browser settings you made, and deleting its files. Everything is in your home folder,
+so no `sudo` is needed.
+
+1. **Quit Fingertip** from its tray icon (**Quit**), or run `pkill -f fingertip`.
+2. **Undo the browser settings.** Otherwise the browser keeps sending traffic to a proxy
+   that no longer exists, and pages won't load.
+   - Firefox: **Settings → General → Network Settings → Settings…**, choose **No proxy**
+     or **Use system proxy settings**, and click OK.
+   - Firefox: **Settings → Privacy & Security → Certificates → View Certificates… →
+     Authorities**, select **DNSSEC** (Fingertip's certificate authority), and click
+     **Delete or Distrust…**.
+   - If you set the proxy or imported the certificate elsewhere (system network settings,
+     Chrome, the system certificate store), undo it there too.
+3. **Delete the files:**
+
+   ```sh
+   # settings, logs, and Fingertip's certificate authority (including its private key)
+   rm -rf "${XDG_CONFIG_HOME:-$HOME/.config}/Fingertip"
+   # hnsd's saved headers
+   rm -rf "${XDG_DATA_HOME:-$HOME/.local/share}/Fingertip-dit"
+   # start-at-login entry, if you enabled "Open at login" in the tray menu
+   rm -f "${XDG_CONFIG_HOME:-$HOME/.config}/autostart/com.impervious.fingertip.desktop"
+   # the app itself: wherever you saved it
+   rm -f ~/Downloads/Fingertip-dit-0.0.4-x86_64.AppImage
+   ```
+
+   Change the last line to wherever you put the AppImage. If you ran an extracted copy
+   (`squashfs-root`), delete that folder too. If you, AppImageLauncher or `appimaged`
+   added Fingertip to your app menu, remove its `.desktop` file from
+   `~/.local/share/applications/`.
+
+Fingertip writes nothing outside your home folder on Linux, so that's everything.
+
 ## Build from source
 
 ### Windows
