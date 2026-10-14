@@ -48,8 +48,11 @@ chmod +x Fingertip-dit-0.0.4-x86_64.AppImage
 ./Fingertip-dit-0.0.4-x86_64.AppImage
 ```
 
-- Needs glibc 2.35 or newer (Ubuntu 22.04+, Debian 12+, Fedora 36+). Some distros need
-  `libfuse2` to run AppImages; without it, run with `--appimage-extract-and-run`.
+- Needs glibc 2.35 or newer and GTK 3 from your distro (Ubuntu 22.04+, Debian 12+,
+  Fedora 36+, Arch). Some distros need `libfuse2` to run AppImages; without it, run with
+  `--appimage-extract-and-run`.
+- On GNOME, the tray icon needs the *AppIndicator and KStatusNotifierItem Support*
+  extension (Ubuntu ships it).
 - `hnsd` saves its headers in `~/.local/share/Fingertip-dit/hnsd-data`.
 - Fingertip doesn't configure Linux automatically (that's unchanged from 0.0.3). On
   first launch it opens its setup page, which walks you through setting your browser's
@@ -90,9 +93,11 @@ cd Fingertip-dit
 
 This unpacks the official Fingertip v0.0.3 AppImage (checked by SHA-256), swaps the old
 `hnsd` for `hnsd-core` plus the launcher ([`wrapper/hnsd-wrapper-linux.c`](wrapper/hnsd-wrapper-linux.c)),
-bundles hnsd's libraries in `usr/lib/hnsd`, and repacks it as
+bundles hnsd's libraries in `usr/lib/hnsd`, drops the official AppImage's 2018 GTK/GLib
+copies (only the AppIndicator tray libraries stay; the app uses the system GTK), and repacks it as
 `dist/Fingertip-dit-0.0.4-x86_64.AppImage`. The [Build Linux AppImage](.github/workflows/build.yml)
-GitHub Actions workflow runs the same script and smoke-tests the result.
+GitHub Actions workflow runs the same script, checks that hnsd syncs, and launches the app
+on Ubuntu 24.04, Debian 12, Fedora and Arch.
 
 `third_party/fingertip` is pinned to the v0.0.3 source for reference. The binary
 isn't rebuilt from it, so the shipped `fingertip` binaries are byte-identical to the
