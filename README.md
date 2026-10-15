@@ -77,7 +77,7 @@ its data folder.
 2. **Turn off start at login.** In the tray menu, untick **Open at login**.
 3. **Quit** from the tray menu.
 4. **Uninstall the app:** **Settings → Apps → Installed apps** (Windows 10: **Apps & features**) → **Fingertip-dit** →
-   Uninstall**. This removes the program files, the Start-menu shortcut and the
+   **Uninstall**. This removes the program files, the Start-menu shortcut and the
    `HKCU\Software\Fingertip-dit` registry key.
 5. **Delete the data and anything left over.** In PowerShell:
 
