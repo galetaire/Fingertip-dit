@@ -61,7 +61,48 @@ chmod +x Fingertip-dit-0.0.4-x86_64.AppImage
 On first start, lookups fail for about 2 minutes while `hnsd` syncs from its checkpoint.
 After that, names resolve.
 
-### Uninstall on Linux
+## Uninstall
+
+### Windows
+
+On Windows, Fingertip's **Auto configure** changes three settings outside its own
+folder: the Windows proxy, a root certificate it trusts, and Firefox. Remove those
+first, while Fingertip is still installed, because it finds its certificate through
+its data folder.
+
+1. **Remove Fingertip's configuration.** Right-click the tray icon → **Options** →
+   untick **Auto configure** → **Yes** at "Remove Fingertip configuration settings?".
+   This clears the proxy setting, deletes the Firefox `user.js` it wrote, and removes
+   its current certificate.
+2. **Turn off start at login.** In the tray menu, untick **Open at login**.
+3. **Quit** from the tray menu.
+4. **Uninstall the app:** **Settings → Apps → Installed apps** (Windows 10: **Apps & features**) → **Fingertip-dit** →
+   Uninstall**. This removes the program files, the Start-menu shortcut and the
+   `HKCU\Software\Fingertip-dit` registry key.
+5. **Delete the data and anything left over.** In PowerShell:
+
+   ```powershell
+   # settings, logs, and Fingertip's certificate authority (including its private key)
+   Remove-Item -Recurse -Force "$env:APPDATA\Fingertip" -ErrorAction SilentlyContinue
+   # hnsd's saved headers (the uninstaller leaves data the app created)
+   Remove-Item -Recurse -Force "$env:LOCALAPPDATA\Fingertip" -ErrorAction SilentlyContinue
+   # start-at-login shortcut, if step 2 was skipped
+   Remove-Item "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup\com.impervious.fingertip.lnk" -ErrorAction SilentlyContinue
+   # every certificate Fingertip ever added: it creates a new one each time its data
+   # is reset, and step 1 only removes the current one
+   Get-ChildItem Cert:\CurrentUser\Root | Where-Object Subject -eq 'CN=DNSSEC, O=DNSSEC' | Remove-Item
+   ```
+
+   Windows asks you to confirm each certificate removal. Click **Yes**.
+
+**If you already uninstalled without step 1:**
+- **Proxy:** in **Settings → Network & internet → Proxy**, turn off **Use setup script**
+  if its address is `http://127.0.0.1:9590/proxy.pac`. Otherwise web pages won't load.
+- **Certificates:** the last line of step 5 removes them.
+- **Firefox:** in `%APPDATA%\Mozilla\Firefox\Profiles\<profile>\`, delete `user.js` if
+  its first line is `// AUTOCONFIG:FINGERTIP`, then restart Firefox.
+
+### Linux
 
 An AppImage isn't installed system-wide, so uninstalling means quitting it, undoing the
 browser settings you made, and deleting its files. Everything is in your home folder,
