@@ -34,12 +34,11 @@ Downloads are on the [Releases](https://github.com/galetaire/Fingertip-dit/relea
 
 Run `Fingertip-dit-0.0.4.msi`. Before you do:
 
-- **Quit Fingertip first** (tray icon → Quit) if it's running.
+- **Quit old Fingertip first** (tray icon → Quit) if it's running.
 - It's a per-user install into `%LOCALAPPDATA%\Fingertip` and needs no admin rights.
   It upgrades an existing Fingertip 0.0.3 in place.
-- The files aren't code-signed, so SmartScreen may warn: **More info → Run anyway**.
+- The files aren't code-signed, so Microsoft Defender SmartScreen may warn: **More info → Run anyway**.
   Check the download against the `.sha256` file in the release.
-- Silent install: `msiexec /i Fingertip-dit-0.0.4.msi /qn`
 
 ### Linux (x86_64)
 
