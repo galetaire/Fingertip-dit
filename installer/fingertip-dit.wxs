@@ -17,8 +17,8 @@
 
     <Icon Id="FingertipIcon" SourceFile="installer/fingertip.ico" />
     <Property Id="ARPPRODUCTICON" Value="FingertipIcon" />
-    <Property Id="ARPURLINFOABOUT" Value="https://github.com/galetaire/Fingertip-dit" />
-    <Property Id="ARPHELPLINK" Value="https://github.com/galetaire/Fingertip-dit/issues" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/galetaire/fingertip" />
+    <Property Id="ARPHELPLINK" Value="https://github.com/galetaire/fingertip/issues" />
     <Property Id="ARPCOMMENTS" Value="Unofficial fork of Fingertip (Impervious) with hnsd from github.com/handshake-org/hnsd" />
 
     <Directory Id="TARGETDIR" Name="SourceDir">
