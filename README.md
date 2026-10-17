@@ -28,7 +28,7 @@ and puts it in a Windows job object so it stops when Fingertip stops it.
 
 ## Install
 
-Downloads are on the [Releases](https://github.com/galetaire/fingertip/releases) page.
+Downloads are on the [Releases](https://github.com/galetaire/fingertip-dit/releases) page.
 
 ### Windows
 
@@ -146,8 +146,8 @@ Requires [MSYS2](https://www.msys2.org). In an **MSYS2 MINGW64** shell:
 ```sh
 pacman -S --needed base-devel autotools git mingw-w64-x86_64-toolchain \
   mingw-w64-x86_64-unbound mingw-w64-x86_64-crt-git mingw-w64-x86_64-msitools
-git clone --recursive https://github.com/galetaire/fingertip.git
-cd fingertip
+git clone --recursive https://github.com/galetaire/fingertip-dit.git
+cd fingertip-dit
 ./build.sh
 ```
 
@@ -162,8 +162,8 @@ On Ubuntu 22.04 x86_64 (or in an `ubuntu:22.04` container):
 
 ```sh
 sudo apt-get install -y build-essential autoconf automake libtool git curl file libunbound-dev patchelf
-git clone --recursive https://github.com/galetaire/fingertip.git
-cd fingertip
+git clone --recursive https://github.com/galetaire/fingertip-dit.git
+cd fingertip-dit
 ./packaging/linux/build-appimage.sh
 ```
 

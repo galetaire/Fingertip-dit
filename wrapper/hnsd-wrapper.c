@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of Fingertip-dit: https://github.com/galetaire/fingertip
+// Part of Fingertip-dit: https://github.com/galetaire/fingertip-dit
 // hnsd wrapper for Fingertip.
 // Fingertip launches "hnsd.exe" with fixed arguments. This wrapper starts the
 // real binary (hnsd-core.exe, same folder) with --checkpoint and --prefix added,
